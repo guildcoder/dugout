@@ -68,3 +68,24 @@ body {
   color: var(--green);
   opacity: 0.8;
 }
+.install-banner {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: var(--green);
+  color: var(--cream);
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  border-top: 2px solid var(--gold);
+  z-index: 100;
+}
+.install-banner button {
+  margin-top: 0.5rem;
+  background: var(--gold);
+  border: none;
+  color: var(--green);
+  padding: 0.4rem 1rem;
+  border-radius: 5px;
+  font-weight: bold;
+}
