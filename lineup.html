@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Write a Lineup | Dugout Team Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: "Montserrat", sans-serif;
+      background: #f9f8f6;
+      color: #1e1e1e;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: #0b3d91;
+      color: #fff;
+      padding: 1.5rem 0;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .intro {
+      max-width: 800px;
+      margin: 1.5rem auto;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .lineup-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    .lineup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .lineup-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #0b3d91;
+    }
+
+    .lineup-form label {
+      display: block;
+      text-align: left;
+      font-weight: 600;
+      margin-top: 1rem;
+      color: #0b3d91;
+    }
+
+    .lineup-form input {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 0.3rem;
+      font-size: 1rem;
+    }
+
+    .lineup-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+
+    .lineup-table th, .lineup-table td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    .lineup-table th {
+      background: #0b3d91;
+      color: #fff;
+    }
+
+    .button-row {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    button {
+      background: #2e8b57;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.8rem 1.6rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #256b45;
+    }
+
+    footer {
+      margin: 3rem 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>Write a Lineup</header>
+
+  <p class="intro">
+    Create your team’s lineup for the next game. Enter your players, positions, and jersey numbers — 
+    and export the lineup for print, announcement, or use in-game.
+  </p>
+
+  <section class="lineup-container">
+    <div class="lineup-header">
+      <h2>Team Lineup</h2>
+      <button id="addPlayerBtn">+ Add Player</button>
+    </div>
+
+    <form class="lineup-form" id="lineupForm">
+      <table class="lineup-table" id="lineupTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Player Name</th>
+            <th>Position</th>
+            <th>Jersey #</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dynamic rows will appear here -->
+        </tbody>
+      </table>
+      <div class="button-row">
+        <button type="submit">Save Lineup</button>
+        <button type="button" id="exportLineup">Export Lineup</button>
+      </div>
+    </form>
+  </section>
+
+  <footer>⚾ Dugout Team Builder | Write Your Lineup, Build Your Legacy.</footer>
+
+  <script>
+    const addPlayerBtn = document.getElementById("addPlayerBtn");
+    const lineupTableBody = document.querySelector("#lineupTable tbody");
+    let playerCount = 0;
+
+    addPlayerBtn.addEventListener("click", () => {
+      playerCount++;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${playerCount}</td>
+        <td><input type="text" name="playerName" placeholder="Player Name" required></td>
+        <td><input type="text" name="position" placeholder="Position" required></td>
+        <td><input type="text" name="jersey" placeholder="#" required></td>
+        <td><button type="button" class="removeBtn">Remove</button></td>
+      `;
+      lineupTableBody.appendChild(row);
+    });
+
+    lineupTableBody.addEventListener("click", (e) => {
+      if (e.target.classList.contains("removeBtn")) {
+        e.target.closest("tr").remove();
+      }
+    });
+
+    document.getElementById("lineupForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("Lineup saved successfully!");
+    });
+
+    document.getElementById("exportLineup").addEventListener("click", () => {
+      let csvContent = "data:text/csv;charset=utf-8,No,Player,Position,Jersey\n";
+      document.querySelectorAll("#lineupTable tbody tr").forEach((row, i) => {
+        const data = Array.from(row.querySelectorAll("input")).map(input => input.value);
+        csvContent += `${i + 1},${data.join(",")}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "team_lineup.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>
