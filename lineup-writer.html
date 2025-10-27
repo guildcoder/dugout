@@ -8,14 +8,16 @@
 
   <style>
     :root {
-      --green: #004225;
-      --cream: #fdf8f2;
-      --tan: #e6d5b8;
-      --red: #b93a32;
+      --cream: #f9f5e7;
+      --green: #1e4022;
+      --red: #a63232;
+      --gold: #d8b26e;
+      --font-title: 'League Spartan', sans-serif;
+      --font-body: 'IBM Plex Sans', sans-serif;
     }
 
     body {
-      font-family: "Poppins", sans-serif;
+      font-family: var(--font-body);
       background-color: var(--cream);
       color: var(--green);
       margin: 0;
@@ -26,32 +28,44 @@
       text-align: center;
       background: var(--green);
       color: var(--cream);
-      padding: 1rem 0;
-      font-size: 1.5rem;
+      padding: 1.2rem 0;
+      font-family: var(--font-title);
+      font-size: 2rem;
       font-weight: 600;
     }
 
     .lineup-container {
       max-width: 1000px;
       margin: 2rem auto;
-      padding: 1rem;
+      padding: 2rem;
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 1rem;
+      border: 2px solid var(--green);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     .lineup-header {
       display: flex;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 1rem;
       margin-bottom: 1.5rem;
+    }
+
+    .lineup-header label {
+      font-weight: bold;
+      font-family: var(--font-title);
+      margin-right: 0.5rem;
     }
 
     .lineup-header input {
       flex: 1;
       padding: 0.5rem;
-      border: 2px solid var(--tan);
-      border-radius: 8px;
+      border: none;
+      border-bottom: 2px solid var(--green);
+      background: transparent;
+      color: var(--green);
+      font-family: var(--font-body);
       font-size: 1rem;
     }
 
@@ -59,56 +73,57 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
+      margin-bottom: 2rem;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      text-align: left;
+      font-size: 0.95rem;
     }
 
     th {
       background: var(--green);
       color: var(--cream);
       padding: 0.5rem;
-      font-weight: 600;
-      border-radius: 6px 6px 0 0;
+      font-family: var(--font-title);
+      letter-spacing: 1px;
     }
 
     td {
-      border: 1px solid var(--tan);
-      padding: 0.5rem;
+      border: 1px solid var(--gold);
+      padding: 0.4rem;
     }
 
     input[type="text"], input[type="number"] {
       width: 100%;
       border: none;
+      background: none;
       outline: none;
-      font-size: 1rem;
       color: var(--green);
-      background: transparent;
+      font-size: 1rem;
+      font-family: var(--font-body);
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      background: var(--cream);
     }
 
     .diamond {
+      text-align: center;
       margin: 2rem auto;
-      width: 200px;
-      height: 200px;
-      border: 3px solid var(--green);
-      border-radius: 4px;
-      transform: rotate(45deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--tan);
-      color: var(--green);
-      font-weight: 600;
+    }
+
+    .diamond img {
+      width: 180px;
+      opacity: 0.8;
     }
 
     .buttons {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      margin-top: 2rem;
+      flex-wrap: wrap;
     }
 
     button {
@@ -116,14 +131,16 @@
       color: var(--cream);
       border: none;
       padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      border-radius: 0.5rem;
+      font-family: var(--font-title);
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: 0.2s;
     }
 
     button:hover {
-      background: var(--red);
+      background: var(--gold);
+      color: var(--green);
     }
 
     @media (max-width: 768px) {
@@ -139,11 +156,18 @@
 
   <div class="lineup-container">
     <div class="lineup-header">
-      <input type="text" id="coachName" placeholder="Coach Name">
-      <input type="text" id="opponentName" placeholder="Opponent">
+      <div>
+        <label>Coach:</label>
+        <input type="text" id="coachName" placeholder="Coach Name" />
+      </div>
+      <div>
+        <label>Opponent:</label>
+        <input type="text" id="opponentName" placeholder="Opponent" />
+      </div>
     </div>
 
     <div class="lineup-grid">
+      <!-- Starting Lineup -->
       <div>
         <table id="mainLineup">
           <thead>
@@ -151,46 +175,49 @@
           </thead>
           <tbody>
             <!-- 9 lineup spots -->
-            ${Array.from({ length: 9 }, (_, i) => `
-              <tr>
-                <td><input type="number" min="0" class="num"></td>
-                <td><input type="text" class="player"></td>
-                <td><input type="text" class="pos"></td>
-              </tr>
-            `).join('')}
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Substitutes -->
       <div>
         <table id="subsLineup">
           <thead>
             <tr><th>#</th><th>Substitute</th><th>Pos.</th></tr>
           </thead>
           <tbody>
-            ${Array.from({ length: 5 }, (_, i) => `
-              <tr>
-                <td><input type="number" min="0" class="num"></td>
-                <td><input type="text" class="player"></td>
-                <td><input type="text" class="pos"></td>
-              </tr>
-            `).join('')}
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <div class="diamond">Diamond</div>
+    <div class="diamond">
+      <img src="assets/diamond.png" alt="Baseball Diamond">
+    </div>
 
     <div class="buttons">
-      <button id="saveLineup">Save Lineup</button>
-      <button id="clearLineup">Clear</button>
-      <button id="exportLineup">Export</button>
+      <button id="saveLineup">💾 Save Lineup</button>
+      <button id="clearLineup">🧹 Clear</button>
+      <button id="exportLineup">📱 Share</button>
     </div>
   </div>
 
   <script>
-    // Save Lineup
+    // Save lineup to localStorage
     document.getElementById("saveLineup").addEventListener("click", () => {
       const coach = document.getElementById("coachName").value;
       const opponent = document.getElementById("opponentName").value;
@@ -208,12 +235,12 @@
       alert("✅ Lineup saved!");
     });
 
-    // Load existing lineup
+    // Load saved lineup
     window.addEventListener("load", () => {
       const data = JSON.parse(localStorage.getItem("lineupData"));
       if (!data) return;
-      document.getElementById("coachName").value = data.coach;
-      document.getElementById("opponentName").value = data.opponent;
+      document.getElementById("coachName").value = data.coach || "";
+      document.getElementById("opponentName").value = data.opponent || "";
 
       const mainRows = document.querySelectorAll("#mainLineup tbody tr");
       const subsRows = document.querySelectorAll("#subsLineup tbody tr");
@@ -235,23 +262,23 @@
       });
     });
 
-    // Clear Lineup
+    // Clear lineup
     document.getElementById("clearLineup").addEventListener("click", () => {
       localStorage.removeItem("lineupData");
       window.location.reload();
     });
 
-    // Export to SMS format
+    // Share via Text (ASCII lineup)
     document.getElementById("exportLineup").addEventListener("click", () => {
       const data = JSON.parse(localStorage.getItem("lineupData"));
       if (!data) return alert("No lineup to export!");
-      let text = `Lineup vs ${data.opponent}\nCoach: ${data.coach}\n\n`;
+      let text = `LINEUP vs ${data.opponent}\nCoach: ${data.coach}\n\n`;
       data.main.forEach((p, i) => {
-        if (p.player) text += `${i+1}. ${p.num || ''} ${p.player} - ${p.pos}\n`;
+        if (p.player) text += `${i+1}. #${p.num || ''} ${p.player} - ${p.pos}\n`;
       });
       text += `\nSubs:\n`;
       data.subs.forEach(p => {
-        if (p.player) text += `- ${p.num || ''} ${p.player} (${p.pos})\n`;
+        if (p.player) text += `- #${p.num || ''} ${p.player} (${p.pos})\n`;
       });
       window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     });
