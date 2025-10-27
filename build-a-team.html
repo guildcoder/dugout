@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ball Club Builder | Dugout Team Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: "Montserrat", sans-serif;
+      background: #f9f8f6;
+      color: #1e1e1e;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: #0b3d91;
+      color: #fff;
+      padding: 1.5rem 0;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    p.intro {
+      max-width: 800px;
+      margin: 1.5rem auto;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .team-section {
+      max-width: 1000px;
+      margin: 2.5rem auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    .team-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #0b3d91;
+    }
+
+    .team-header a {
+      background: #0b3d91;
+      color: #fff;
+      text-decoration: none;
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .image-gallery {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .image-gallery img {
+      width: 30%;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .button-row {
+      margin: 3rem auto;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    button, .mailto-btn {
+      background: #2e8b57;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.8rem 1.6rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-decoration: none;
+    }
+
+    button:hover, .mailto-btn:hover {
+      background: #256b45;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 80, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #333;
+      padding: 2rem;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: left;
+    }
+
+    .modal-content h3 {
+      text-align: center;
+      color: #0b3d91;
+      margin-bottom: 1rem;
+    }
+
+    form label {
+      display: block;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    form input, form textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 0.3rem;
+    }
+
+    .close-btn {
+      background: #0b3d91;
+      color: #fff;
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      margin-top: 1.2rem;
+      float: right;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <header>Ball Club Builder</header>
+
+  <p class="intro">
+    Please see examples below. If your travel ball, little league, or softball/baseball team needs a custom name and design, 
+    we’ll work with you to build the most fitting ball club possible. 
+    We can design from scratch, build your team store, or design around your existing identity.
+  </p>
+
+  <!-- Example Team Sections -->
+  <section class="team-section">
+    <div class="team-header">
+      <h2>Liberty Ringers</h2>
+      <a href="#">View Team Store</a>
+    </div>
+    <div class="image-gallery">
+      <img src="example1a.jpg" alt="Liberty Ringers Cap" />
+      <img src="example1b.jpg" alt="Liberty Ringers Jersey" />
+      <img src="example1c.jpg" alt="Liberty Ringers Merch" />
+    </div>
+  </section>
+
+  <section class="team-section">
+    <div class="team-header">
+      <h2>Midwest Miners</h2>
+      <a href="#">View Team Store</a>
+    </div>
+    <div class="image-gallery">
+      <img src="example2a.jpg" alt="Midwest Miners Cap" />
+      <img src="example2b.jpg" alt="Midwest Miners Jersey" />
+      <img src="example2c.jpg" alt="Midwest Miners Merch" />
+    </div>
+  </section>
+
+  <section class="team-section">
+    <div class="team-header">
+      <h2>Gulf Coast Gators</h2>
+      <a href="#">View Team Store</a>
+    </div>
+    <div class="image-gallery">
+      <img src="example3a.jpg" alt="Gulf Coast Gators Cap" />
+      <img src="example3b.jpg" alt="Gulf Coast Gators Jersey" />
+      <img src="example3c.jpg" alt="Gulf Coast Gators Merch" />
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <div class="button-row">
+    <button id="openForm">Build a Ball Club</button>
+    <a class="mailto-btn" href="mailto:fivetwothreeww@gmail.com?subject=Request%20for%20Build%20a%20Ball%20Club%20Consultation">Request Consultation</a>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="formModal">
+    <div class="modal-content">
+      <h3>Build Your Ball Club</h3>
+      <p>Fill out the information below — as much or as little as you want. Our design team will reach out within 72 hours to start building your ball club. Building your club is <strong>free</strong>, and we’ll handle all designs, merch, and team store setup for you.</p>
+
+      <form id="clubForm">
+        <label>Team Location</label><input type="text" id="location" />
+
+        <label>Town Nicknames (if any)</label><input type="text" id="nickname" />
+
+        <label>Team Color Ideas (if any)</label><input type="text" id="colors" />
+
+        <label>Team Name Ideas (if any)</label><input type="text" id="name" />
+
+        <label>Team Mascot Ideas (if any)</label><input type="text" id="mascot" />
+
+        <label>Age Group</label><input type="text" id="age" />
+
+        <label>Major/Minor League Inspiration</label><input type="text" id="inspiration" />
+
+        <label>Additional Info / Ball Club Notes</label><textarea id="notes" rows="3"></textarea>
+
+        <button type="submit" style="margin-top:1rem;">Submit</button>
+      </form>
+
+      <div class="close-btn" id="closeModal">Close</div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("formModal");
+    document.getElementById("openForm").onclick = () => modal.style.display = "flex";
+    document.getElementById("closeModal").onclick = () => modal.style.display = "none";
+
+    document.getElementById("clubForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const subject = encodeURIComponent("Request for Ball Club Design");
+      const body = encodeURIComponent(
+        `⚾ BALL CLUB REQUEST ⚾\n\n` +
+        `📍 Location: ${document.getElementById('location').value}\n` +
+        `🏙️ Nicknames: ${document.getElementById('nickname').value}\n` +
+        `🎨 Colors: ${document.getElementById('colors').value}\n` +
+        `🏆 Name Ideas: ${document.getElementById('name').value}\n` +
+        `🦁 Mascot Ideas: ${document.getElementById('mascot').value}\n` +
+        `👥 Age Group: ${document.getElementById('age').value}\n` +
+        `⚾ Inspiration: ${document.getElementById('inspiration').value}\n\n` +
+        `📝 Notes:\n${document.getElementById('notes').value}`
+      );
+
+      window.location.href = `mailto:fivetwothreeww@gmail.com?subject=${subject}&body=${body}`;
+    });
+  </script>
+</body>
+</html>
