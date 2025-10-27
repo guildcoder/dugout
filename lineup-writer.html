@@ -28,44 +28,32 @@
       text-align: center;
       background: var(--green);
       color: var(--cream);
-      padding: 1.2rem 0;
+      padding: 1rem 0;
       font-family: var(--font-title);
       font-size: 2rem;
-      font-weight: 600;
     }
 
     .lineup-container {
       max-width: 1000px;
       margin: 2rem auto;
-      padding: 2rem;
+      padding: 1.5rem;
       background: white;
       border-radius: 1rem;
-      border: 2px solid var(--green);
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .lineup-header {
       display: flex;
       justify-content: space-between;
-      flex-wrap: wrap;
       gap: 1rem;
       margin-bottom: 1.5rem;
-    }
-
-    .lineup-header label {
-      font-weight: bold;
-      font-family: var(--font-title);
-      margin-right: 0.5rem;
     }
 
     .lineup-header input {
       flex: 1;
       padding: 0.5rem;
-      border: none;
-      border-bottom: 2px solid var(--green);
-      background: transparent;
-      color: var(--green);
-      font-family: var(--font-body);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
       font-size: 1rem;
     }
 
@@ -73,12 +61,12 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
-      margin-bottom: 2rem;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      text-align: left;
       font-size: 0.95rem;
     }
 
@@ -86,44 +74,40 @@
       background: var(--green);
       color: var(--cream);
       padding: 0.5rem;
-      font-family: var(--font-title);
-      letter-spacing: 1px;
+      font-weight: 600;
     }
 
     td {
       border: 1px solid var(--gold);
-      padding: 0.4rem;
+      padding: 0.5rem;
     }
 
     input[type="text"], input[type="number"] {
       width: 100%;
       border: none;
-      background: none;
       outline: none;
-      color: var(--green);
       font-size: 1rem;
-      font-family: var(--font-body);
-    }
-
-    input[type="text"]:focus, input[type="number"]:focus {
-      background: var(--cream);
+      color: var(--green);
+      background: transparent;
     }
 
     .diamond {
-      text-align: center;
       margin: 2rem auto;
+      display: flex;
+      justify-content: right;
     }
 
     .diamond img {
-      width: 180px;
-      opacity: 0.8;
+      width: 280px;
+      height: auto;
+      border-radius: 8px;
     }
 
     .buttons {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      flex-wrap: wrap;
+      margin-top: 2rem;
     }
 
     button {
@@ -131,16 +115,14 @@
       color: var(--cream);
       border: none;
       padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      font-family: var(--font-title);
+      border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-      transition: 0.2s;
+      transition: background 0.2s ease;
     }
 
     button:hover {
-      background: var(--gold);
-      color: var(--green);
+      background: var(--red);
     }
 
     @media (max-width: 768px) {
@@ -156,18 +138,12 @@
 
   <div class="lineup-container">
     <div class="lineup-header">
-      <div>
-        <label>Coach:</label>
-        <input type="text" id="coachName" placeholder="Coach Name" />
-      </div>
-      <div>
-        <label>Opponent:</label>
-        <input type="text" id="opponentName" placeholder="Opponent" />
-      </div>
+      <input type="text" id="coachName" placeholder="Coach Name">
+      <input type="text" id="opponentName" placeholder="Opponent">
     </div>
 
     <div class="lineup-grid">
-      <!-- Starting Lineup -->
+      <!-- Main Lineup -->
       <div>
         <table id="mainLineup">
           <thead>
@@ -175,49 +151,49 @@
           </thead>
           <tbody>
             <!-- 9 lineup spots -->
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Substitutes -->
+      <!-- Subs -->
       <div>
         <table id="subsLineup">
           <thead>
             <tr><th>#</th><th>Substitute</th><th>Pos.</th></tr>
           </thead>
           <tbody>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
-            <tr><td><input type="number" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
+            <tr><td><input type="number" min="0" class="num"></td><td><input type="text" class="player"></td><td><input type="text" class="pos"></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
     <div class="diamond">
-      <img src="assets/diamond.png" alt="Baseball Diamond">
+      <img src="diamond.png" alt="Baseball Diamond">
     </div>
 
     <div class="buttons">
-      <button id="saveLineup">💾 Save Lineup</button>
-      <button id="clearLineup">🧹 Clear</button>
-      <button id="exportLineup">📱 Share</button>
+      <button id="saveLineup">Save Lineup</button>
+      <button id="clearLineup">Clear</button>
+      <button id="exportLineup">Export</button>
     </div>
   </div>
 
   <script>
-    // Save lineup to localStorage
+    // Save Lineup
     document.getElementById("saveLineup").addEventListener("click", () => {
       const coach = document.getElementById("coachName").value;
       const opponent = document.getElementById("opponentName").value;
@@ -235,12 +211,12 @@
       alert("✅ Lineup saved!");
     });
 
-    // Load saved lineup
+    // Load lineup
     window.addEventListener("load", () => {
       const data = JSON.parse(localStorage.getItem("lineupData"));
       if (!data) return;
-      document.getElementById("coachName").value = data.coach || "";
-      document.getElementById("opponentName").value = data.opponent || "";
+      document.getElementById("coachName").value = data.coach;
+      document.getElementById("opponentName").value = data.opponent;
 
       const mainRows = document.querySelectorAll("#mainLineup tbody tr");
       const subsRows = document.querySelectorAll("#subsLineup tbody tr");
@@ -262,23 +238,23 @@
       });
     });
 
-    // Clear lineup
+    // Clear Lineup
     document.getElementById("clearLineup").addEventListener("click", () => {
       localStorage.removeItem("lineupData");
       window.location.reload();
     });
 
-    // Share via Text (ASCII lineup)
+    // Export to SMS format
     document.getElementById("exportLineup").addEventListener("click", () => {
       const data = JSON.parse(localStorage.getItem("lineupData"));
       if (!data) return alert("No lineup to export!");
-      let text = `LINEUP vs ${data.opponent}\nCoach: ${data.coach}\n\n`;
+      let text = `Lineup vs ${data.opponent}\nCoach: ${data.coach}\n\n`;
       data.main.forEach((p, i) => {
-        if (p.player) text += `${i+1}. #${p.num || ''} ${p.player} - ${p.pos}\n`;
+        if (p.player) text += `${i + 1}. ${p.num || ''} ${p.player} - ${p.pos}\n`;
       });
       text += `\nSubs:\n`;
       data.subs.forEach(p => {
-        if (p.player) text += `- #${p.num || ''} ${p.player} (${p.pos})\n`;
+        if (p.player) text += `- ${p.num || ''} ${p.player} (${p.pos})\n`;
       });
       window.location.href = `sms:?body=${encodeURIComponent(text)}`;
     });
