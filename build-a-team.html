@@ -3,120 +3,267 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Build a Ball Club | Dugout Team Builder</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Ball Club Builder | Dugout Team Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: "Montserrat", sans-serif;
+      background: #f9f8f6;
+      color: #1e1e1e;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: #0b3d91;
+      color: #fff;
+      padding: 1.5rem 0;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    p.intro {
+      max-width: 800px;
+      margin: 1.5rem auto;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .team-section {
+      max-width: 1000px;
+      margin: 2.5rem auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    .team-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #0b3d91;
+    }
+
+    .team-header a {
+      background: #0b3d91;
+      color: #fff;
+      text-decoration: none;
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .image-gallery {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .image-gallery img {
+      width: 30%;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .button-row {
+      margin: 3rem auto;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    button, .mailto-btn {
+      background: #2e8b57;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.8rem 1.6rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-decoration: none;
+    }
+
+    button:hover, .mailto-btn:hover {
+      background: #256b45;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 80, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #333;
+      padding: 2rem;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: left;
+    }
+
+    .modal-content h3 {
+      text-align: center;
+      color: #0b3d91;
+      margin-bottom: 1rem;
+    }
+
+    form label {
+      display: block;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    form input, form textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 0.3rem;
+    }
+
+    .close-btn {
+      background: #0b3d91;
+      color: #fff;
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      margin-top: 1.2rem;
+      float: right;
+      cursor: pointer;
+    }
+
+  </style>
 </head>
 <body>
+  <header>Ball Club Builder</header>
 
-  <header class="app-header">
-    <h1>Ball Club Builder</h1>
-    <p class="tagline">Create your team. Build your legacy.</p>
-  </header>
+  <p class="intro">
+    Please see examples below. If your travel ball, little league, or softball/baseball team needs a custom name and design, 
+    we’ll work with you to build the most fitting ball club possible. 
+    We can design from scratch, build your team store, or design around your existing identity.
+  </p>
 
-  <main class="main-menu">
-
-    <section class="menu-card">
-      <h2>Build Your Team</h2>
-      <p>
-        If your travel ball, little league, or softball/baseball team needs a custom name
-        and ball club design, our team of designers will build your identity from the ground up.
-        You can give as much or as little direction as you like — colors, mascots, names, and ideas welcome.
-        Once finalized, we’ll handle your merch store for caps, jerseys, and gear completely on our end.
-      </p>
-      <p class="tagline">Please see examples below 👇</p>
-    </section>
-
-    <!-- Example Team 1 -->
-    <section class="menu-card">
-      <div class="team-header" style="display: flex; justify-content: space-between; align-items: center;">
-       <h3>Liberty Ringers</h3>
-        <a href="#" class="button" style="background: var(--gold); color: var(--green); padding: 0.4rem 0.8rem; border-radius: 5px; text-decoration: none;">View Team Store</a>
-      </div>
-      <div class="image-gallery" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-        <img src="assets/ringers1.jpg" alt="Liberty Ringers Logo" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-        <img src="assets/ringers2.jpg" alt="Liberty Ringers Merch" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-        <img src="assets/ringers3.jpg" alt="Liberty Ringers Gear" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-      </div>
-    </section>
-
-    <!-- Example Team 2 -->
-    <section class="menu-card">
-      <div class="team-header" style="display: flex; justify-content: space-between; align-items: center;">
-       <h3>Wise Guys Baseball Club</h3>
-        <a href="#" class="button" style="background: var(--gold); color: var(--green); padding: 0.4rem 0.8rem; border-radius: 5px; text-decoration: none;">View Team Store</a>
-      </div>
-      <div class="image-gallery" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-        <img src="assets/wiseguys1.jpg" alt="Wise Guys Logo" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-        <img src="assets/wiseguys2.jpg" alt="Wise Guys Merch" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-        <img src="assets/wiseguys3.jpg" alt="Wise Guys Gear" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-      </div>
-    </section>
-
-    <!-- Example Team 3 -->
-    <section class="menu-card">
-      <div class="team-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Bay City Sluggers</h3>
-        <a href="#" class="button" style="background: var(--gold); color: var(--green); padding: 0.4rem 0.8rem; border-radius: 5px; text-decoration: none;">View Team Store</a>
-      </div>
-      <div class="image-gallery" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-        <img src="assets/sluggers1.jpg" alt="Bay City Sluggers Logo" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-        <img src="assets/sluggers2.jpg" alt="Bay City Sluggers Merch" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-        <img src="assets/sluggers3.jpg" alt="Bay City Sluggers Gear" style="width: 32%; border-radius: 0.5rem; border: 2px solid var(--green);" />
-      </div>
-    </section>
-
-    <!-- Buttons -->
-    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
-      <button id="buildBtn" style="background: var(--green); color: var(--cream); padding: 0.6rem 1.5rem; border: none; border-radius: 0.5rem; font-weight: bold;">Build a Ball Club</button>
-      <a href="mailto:fivetwothreeww@gmail.com?subject=Request%20for%20Build%20a%20Ball%20Club%20Consultation" class="button" style="background: var(--gold); color: var(--green); padding: 0.6rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: bold;">Request Consultation</a>
+  <!-- Example Team Sections -->
+  <section class="team-section">
+    <div class="team-header">
+      <h2>Liberty Ringers</h2>
+      <a href="#">View Team Store</a>
     </div>
+    <div class="image-gallery">
+      <img src="example1a.jpg" alt="Liberty Ringers Cap" />
+      <img src="example1b.jpg" alt="Liberty Ringers Jersey" />
+      <img src="example1c.jpg" alt="Liberty Ringers Merch" />
+    </div>
+  </section>
 
-  </main>
+  <section class="team-section">
+    <div class="team-header">
+      <h2>Midwest Miners</h2>
+      <a href="#">View Team Store</a>
+    </div>
+    <div class="image-gallery">
+      <img src="example2a.jpg" alt="Midwest Miners Cap" />
+      <img src="example2b.jpg" alt="Midwest Miners Jersey" />
+      <img src="example2c.jpg" alt="Midwest Miners Merch" />
+    </div>
+  </section>
 
-  <!-- Popup Modal -->
-  <div id="popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(30,64,34,0.95); color:var(--cream); z-index:999; justify-content:center; align-items:center; padding:2rem;">
-    <div style="max-width:600px; background:var(--cream); color:var(--green); padding:1.5rem; border-radius:1rem;">
-      <h2 style="text-align:center;">Build Your Ball Club</h2>
-      <p>Fill out the form below — it will open your email app pre-filled with your team info. Our designers will reach out within 72 hours to collaborate on your ball club. Building is free; we handle the designs and create your team merch store automatically.</p>
+  <section class="team-section">
+    <div class="team-header">
+      <h2>Gulf Coast Gators</h2>
+      <a href="#">View Team Store</a>
+    </div>
+    <div class="image-gallery">
+      <img src="example3a.jpg" alt="Gulf Coast Gators Cap" />
+      <img src="example3b.jpg" alt="Gulf Coast Gators Jersey" />
+      <img src="example3c.jpg" alt="Gulf Coast Gators Merch" />
+    </div>
+  </section>
 
-      <form id="teamForm" style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem;">
-        <input type="text" placeholder="Team Location" name="location" />
-        <input type="text" placeholder="Town Nicknames (if any)" name="nicknames" />
-        <input type="text" placeholder="Team Color Ideas" name="colors" />
-        <input type="text" placeholder="Team Name Ideas" name="name" />
-        <input type="text" placeholder="Mascot Ideas" name="mascot" />
-        <input type="text" placeholder="Age Group" name="age" />
-        <input type="text" placeholder="Pro Teams as Inspiration" name="inspo" />
-        <textarea placeholder="Additional Notes / Ball Club Info" name="notes"></textarea>
+  <!-- Buttons -->
+  <div class="button-row">
+    <button id="openForm">Build a Ball Club</button>
+    <a class="mailto-btn" href="mailto:fivetwothreeww@gmail.com?subject=Request%20for%20Build%20a%20Ball%20Club%20Consultation">Request Consultation</a>
+  </div>
 
-        <button type="submit" style="background:var(--green); color:var(--cream); border:none; padding:0.6rem; border-radius:0.5rem; font-weight:bold;">Submit Ball Club Request</button>
+  <!-- Modal -->
+  <div class="modal" id="formModal">
+    <div class="modal-content">
+      <h3>Build Your Ball Club</h3>
+      <p>Fill out the information below — as much or as little as you want. Our design team will reach out within 72 hours to start building your ball club. Building your club is <strong>free</strong>, and we’ll handle all designs, merch, and team store setup for you.</p>
+
+      <form id="clubForm">
+        <label>Team Location</label><input type="text" id="location" />
+
+        <label>Town Nicknames (if any)</label><input type="text" id="nickname" />
+
+        <label>Team Color Ideas (if any)</label><input type="text" id="colors" />
+
+        <label>Team Name Ideas (if any)</label><input type="text" id="name" />
+
+        <label>Team Mascot Ideas (if any)</label><input type="text" id="mascot" />
+
+        <label>Age Group</label><input type="text" id="age" />
+
+        <label>Major/Minor League Inspiration</label><input type="text" id="inspiration" />
+
+        <label>Additional Info / Ball Club Notes</label><textarea id="notes" rows="3"></textarea>
+
+        <button type="submit" style="margin-top:1rem;">Submit</button>
       </form>
 
-      <div style="text-align:center; margin-top:1rem;">
-        <button id="closePopup" style="background:var(--gold); color:var(--green); border:none; padding:0.5rem 1rem; border-radius:0.5rem;">Close</button>
-      </div>
+      <div class="close-btn" id="closeModal">Close</div>
     </div>
   </div>
 
-  <footer class="footer">
-    <p>&copy; 2025 Dugout Team Builder • Play Ball!</p>
-  </footer>
-
   <script>
-    const popup = document.getElementById('popup');
-    document.getElementById('buildBtn').onclick = () => popup.style.display = 'flex';
-    document.getElementById('closePopup').onclick = () => popup.style.display = 'none';
+    const modal = document.getElementById("formModal");
+    document.getElementById("openForm").onclick = () => modal.style.display = "flex";
+    document.getElementById("closeModal").onclick = () => modal.style.display = "none";
 
-    document.getElementById('teamForm').onsubmit = (e) => {
+    document.getElementById("clubForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      const data = new FormData(e.target);
-      const fields = Array.from(data.entries())
-        .map(([k, v]) => \`• \${k}: \${v}\`)
-        .join('%0A');
-      const mailto = \`mailto:fivetwothreeww@gmail.com?subject=Ball%20Club%20Design%20Request&body=⚾%20New%20Team%20Request:%0A%0A\${fields}\`;
-      window.location.href = mailto;
-    };
-  </script>
 
+      const subject = encodeURIComponent("Request for Ball Club Design");
+      const body = encodeURIComponent(
+        `⚾ BALL CLUB REQUEST ⚾\n\n` +
+        `📍 Location: ${document.getElementById('location').value}\n` +
+        `🏙️ Nicknames: ${document.getElementById('nickname').value}\n` +
+        `🎨 Colors: ${document.getElementById('colors').value}\n` +
+        `🏆 Name Ideas: ${document.getElementById('name').value}\n` +
+        `🦁 Mascot Ideas: ${document.getElementById('mascot').value}\n` +
+        `👥 Age Group: ${document.getElementById('age').value}\n` +
+        `⚾ Inspiration: ${document.getElementById('inspiration').value}\n\n` +
+        `📝 Notes:\n${document.getElementById('notes').value}`
+      );
+
+      window.location.href = `mailto:fivetwothreeww@gmail.com?subject=${subject}&body=${body}`;
+    });
+  </script>
 </body>
 </html>
