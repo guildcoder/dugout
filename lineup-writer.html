@@ -3,27 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Team Lineup</title>
+  <title>Dugout Lineup Card</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background-color: #f9f9f9;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
       padding: 20px;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
     .lineup-card {
-      max-width: 600px;
-      margin: 0 auto;
       background-color: #fff;
       padding: 20px;
       border: 2px solid #333;
       border-radius: 8px;
-      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 2px 2px 12px rgba(0,0,0,0.1);
+      max-width: 700px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 24px;
     }
 
     table {
@@ -33,18 +36,21 @@
 
     th, td {
       border-bottom: 1px solid #ccc;
-      padding: 8px;
+      padding: 6px 8px;
       text-align: left;
     }
 
     th {
       background-color: #eee;
+      font-weight: bold;
+      text-align: center;
     }
 
-    input {
+    td input {
       width: 90%;
       padding: 4px;
       font-size: 14px;
+      box-sizing: border-box;
     }
 
     .buttons {
@@ -53,69 +59,120 @@
     }
 
     button {
-      padding: 10px 20px;
+      padding: 10px 18px;
       margin: 0 5px;
       font-size: 14px;
       cursor: pointer;
     }
+
+    .sub-header {
+      background-color: #f0f0f0;
+      font-weight: bold;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>Team Lineup</h1>
   <div class="lineup-card">
+    <h1>Dugout Lineup Card</h1>
     <table id="lineup-table">
       <thead>
         <tr>
           <th>#</th>
           <th>Player Name</th>
+          <th>Jersey</th>
           <th>Position</th>
         </tr>
       </thead>
       <tbody>
-        <!-- 9 player slots -->
+        <!-- 9 Starters -->
         ${[...Array(9)].map((_, i) => `
         <tr>
-          <td>${i + 1}</td>
-          <td><input type="text" id="player-${i+1}" placeholder="Enter name"></td>
-          <td><input type="text" id="position-${i+1}" placeholder="Enter position"></td>
+          <td style="text-align:center;">${i+1}</td>
+          <td><input type="text" id="player-${i+1}" placeholder="Name"></td>
+          <td><input type="text" id="jersey-${i+1}" placeholder="#"></td>
+          <td><input type="text" id="position-${i+1}" placeholder="Pos"></td>
+        </tr>
+        `).join('')}
+        <!-- Substitutes Header -->
+        <tr class="sub-header">
+          <td colspan="4">Substitutes</td>
+        </tr>
+        <!-- 5 Subs -->
+        ${[...Array(5)].map((_, i) => `
+        <tr>
+          <td style="text-align:center;">${i+10}</td>
+          <td><input type="text" id="player-${i+10}" placeholder="Name"></td>
+          <td><input type="text" id="jersey-${i+10}" placeholder="#"></td>
+          <td><input type="text" id="position-${i+10}" placeholder="Pos"></td>
         </tr>
         `).join('')}
       </tbody>
     </table>
+
     <div class="buttons">
       <button onclick="saveLineup()">Save Lineup</button>
       <button onclick="clearLineup()">Clear Lineup</button>
+      <button onclick="exportLineup()">Export Lineup</button>
     </div>
   </div>
 
   <script>
-    // Load saved lineup on page load
+    // Load saved lineup
     window.onload = () => {
-      for (let i = 1; i <= 9; i++) {
-        const name = localStorage.getItem('player-' + i);
+      for (let i = 1; i <= 14; i++) {
+        const player = localStorage.getItem('player-' + i);
+        const jersey = localStorage.getItem('jersey-' + i);
         const position = localStorage.getItem('position-' + i);
-        if (name) document.getElementById('player-' + i).value = name;
+        if (player) document.getElementById('player-' + i).value = player;
+        if (jersey) document.getElementById('jersey-' + i).value = jersey;
         if (position) document.getElementById('position-' + i).value = position;
       }
     }
 
     function saveLineup() {
-      for (let i = 1; i <= 9; i++) {
-        const name = document.getElementById('player-' + i).value;
-        const position = document.getElementById('position-' + i).value;
-        localStorage.setItem('player-' + i, name);
-        localStorage.setItem('position-' + i, position);
+      for (let i = 1; i <= 14; i++) {
+        localStorage.setItem('player-' + i, document.getElementById('player-' + i).value);
+        localStorage.setItem('jersey-' + i, document.getElementById('jersey-' + i).value);
+        localStorage.setItem('position-' + i, document.getElementById('position-' + i).value);
       }
       alert('Lineup saved!');
     }
 
     function clearLineup() {
       if (!confirm('Are you sure you want to clear the lineup?')) return;
-      for (let i = 1; i <= 9; i++) {
+      for (let i = 1; i <= 14; i++) {
         document.getElementById('player-' + i).value = '';
+        document.getElementById('jersey-' + i).value = '';
         document.getElementById('position-' + i).value = '';
         localStorage.removeItem('player-' + i);
+        localStorage.removeItem('jersey-' + i);
         localStorage.removeItem('position-' + i);
+      }
+    }
+
+    function exportLineup() {
+      let textExport = "Dugout Lineup Card\\n\\n";
+      textExport += "Starters:\\n";
+      for (let i = 1; i <= 9; i++) {
+        const name = document.getElementById('player-' + i).value || "___";
+        const jersey = document.getElementById('jersey-' + i).value || "_";
+        const pos = document.getElementById('position-' + i).value || "__";
+        textExport += `${i}. ${name} | #${jersey} | ${pos}\\n`;
+      }
+      textExport += "\\nSubstitutes:\\n";
+      for (let i = 10; i <= 14; i++) {
+        const name = document.getElementById('player-' + i).value || "___";
+        const jersey = document.getElementById('jersey-' + i).value || "_";
+        const pos = document.getElementById('position-' + i).value || "__";
+        textExport += `${i}. ${name} | #${jersey} | ${pos}\\n`;
+      }
+      const smsLink = `sms:?body=${encodeURIComponent(textExport)}`;
+      if (confirm("Do you want to share via SMS? Press Cancel to just copy the text.")) {
+        window.location.href = smsLink;
+      } else {
+        navigator.clipboard.writeText(textExport);
+        alert("Lineup copied to clipboard!");
       }
     }
   </script>
