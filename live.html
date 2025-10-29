@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dugout — Live Game Viewer</title>
+
+  <!-- Minimal Dugout styling -->
+  <style>
+    :root{
+      --cream:#f9f5e7; --green:#1e4022; --gold:#d8b26e; --red:#a63232;
+      --font-title:'League Spartan', sans-serif; --font-body:'IBM Plex Sans', sans-serif;
+    }
+    html,body{height:100%;margin:0;font-family:var(--font-body);background:var(--cream);color:var(--green)}
+    header{background:var(--green);color:var(--cream);padding:1rem;text-align:center;font-family:var(--font-title);font-size:1.4rem}
+    .wrap{max-width:1100px;margin:1rem auto;padding:1rem}
+    .card{background:#fff;border:2px solid var(--green);border-radius:10px;padding:1rem;box-shadow:0 8px 20px rgba(0,0,0,0.06)}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+    .score{display:flex;gap:1.25rem;align-items:center}
+    .score .team{background:var(--green);color:var(--cream);padding:.6rem 1rem;border-radius:8px;font-weight:700}
+    .meta{font-size:.95rem;color:#444}
+    .main-grid{display:grid;grid-template-columns:1fr 340px;gap:1rem;margin-top:1rem}
+    .lineup-list{max-height:520px;overflow:auto;padding:0;margin:0;list-style:none}
+    .lineup-list li{padding:.5rem;border-bottom:1px dashed #eee;display:flex;justify-content:space-between;align-items:center}
+    .lineup-list li.current{background:linear-gradient(90deg, rgba(29,66,34,0.08), rgba(216,178,110,0.04));font-weight:700}
+    .inning-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+    .inning-cell{width:36px;height:36px;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-weight:700;background:#fafafa;border-radius:6px}
+    .diamond{display:flex;justify-content:center;margin-top:1rem}
+    .diamond img{width:160px;opacity:.95}
+    .right-col .scoreboard{margin-bottom:1rem}
+    .share-row{display:flex;gap:.5rem;align-items:center}
+    .link-input{padding:.5rem;border:1px solid #ddd;border-radius:6px;flex:1}
+    .btn{background:var(--green);color:var(--cream);border:none;padding:.55rem .9rem;border-radius:8px;cursor:pointer;font-weight:700}
+    .btn-plain{background:transparent;border:2px solid var(--green);color:var(--green)}
+    .muted{color:#666;font-size:.9rem}
+    .center{display:flex;justify-content:center;align-items:center}
+    @media(max-width:900px){ .main-grid{grid-template-columns:1fr} .right-col{order:-1} }
+  </style>
+
+  <!-- Firebase compat libs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>Dugout — Live Game Viewer</header>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div>
+          <div style="display:flex;gap:1rem;align-items:center">
+            <div class="score">
+              <div class="team" id="awayName">Away</div>
+              <div style="font-size:1.6rem;font-weight:800" id="awayScore">0</div>
+            </div>
+            <div class="score">
+              <div class="team" id="homeName">Home</div>
+              <div style="font-size:1.6rem;font-weight:800" id="homeScore">0</div>
+            </div>
+          </div>
+          <div class="meta" style="margin-top:.4rem">
+            Inning: <strong id="inningDisplay">1</strong> • Outs: <strong id="outsDisplay">0</strong> • Balls: <strong id="ballsDisplay">0</strong> • Strikes: <strong id="strikesDisplay">0</strong>
+          </div>
+        </div>
+
+        <div style="min-width:280px">
+          <div class="share-row">
+            <input id="linkBox" class="link-input" readonly placeholder="Live link will appear here when game ID provided" />
+            <button id="copyBtn" class="btn">Copy</button>
+          </div>
+          <div style="margin-top:.5rem" class="muted">Live updates appear automatically as the scorer saves plays.</div>
+        </div>
+      </div>
+
+      <div class="main-grid">
+        <!-- Left: lineup + inning grid -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Batting Order</strong></div>
+            <div class="muted">Highlight shows current batter</div>
+          </div>
+
+          <ul id="lineupList" class="lineup-list" aria-live="polite"></ul>
+
+          <div style="margin-top:1rem"><strong>Runs by inning (Away)</strong>
+            <div id="inningsRow" class="inning-row"></div>
+          </div>
+
+          <div class="diamond" aria-hidden="true">
+            <img id="diamondImg" src="assets/diamond.png" alt="field diamond">
+          </div>
+        </div>
+
+        <!-- Right column: scoreboard / recent plays -->
+        <div class="right-col">
+          <div class="card scoreboard">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+              <strong>Game Info</strong>
+              <div class="muted" id="gameNameDisplay"></div>
+            </div>
+
+            <div><strong>Current Batter</strong></div>
+            <div style="margin:.5rem 0;padding:.6rem;border:1px dashed #eee;border-radius:8px" id="currentBatterBox">—</div>
+
+            <div style="margin-top:.8rem">
+              <strong>Recent Plays</strong>
+              <div id="recentPlays" style="max-height:220px;overflow:auto;margin-top:.5rem;padding-right:.4rem"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem" class="card">
+            <div style="display:flex;gap:.6rem;align-items:center;justify-content:space-between">
+              <div><strong>Share / Actions</strong></div>
+              <div class="muted">Read-only view</div>
+            </div>
+
+            <div style="margin-top:.6rem;display:flex;gap:.5rem">
+              <button id="openLiveBtn" class="btn-plain">Open in new tab</button>
+              <button id="refreshBtn" class="btn">Refresh</button>
+            </div>
+
+            <div style="margin-top:.8rem" class="muted">If the game was ended or removed you'll see a message here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ========== FIREBASE CONFIG (your snippet) ========== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBri9ILoCR21RS1ow2epFocbka63sLOSEM",
+  authDomain: "dugout-live-96480.firebaseapp.com",
+  projectId: "dugout-live-96480",
+  storageBucket: "dugout-live-96480.firebasestorage.app",
+  messagingSenderId: "183818216509",
+  appId: "1:183818216509:web:579e3d68c856591346b654",
+  measurementId: "G-9XE7D18EYH"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ========== DOM refs ========== */
+const q = new URLSearchParams(location.search);
+const gameId = q.get('game');
+const linkBox = document.getElementById('linkBox');
+const copyBtn = document.getElementById('copyBtn');
+const openLiveBtn = document.getElementById('openLiveBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+
+const awayNameEl = document.getElementById('awayName');
+const homeNameEl = document.getElementById('homeName');
+const awayScoreEl = document.getElementById('awayScore');
+const homeScoreEl = document.getElementById('homeScore');
+const inningDisplay = document.getElementById('inningDisplay');
+const ballsDisplay = document.getElementById('ballsDisplay');
+const strikesDisplay = document.getElementById('strikesDisplay');
+const outsDisplay = document.getElementById('outsDisplay');
+const lineupList = document.getElementById('lineupList');
+const currentBatterBox = document.getElementById('currentBatterBox');
+const recentPlays = document.getElementById('recentPlays');
+const inningsRow = document.getElementById('inningsRow');
+const gameNameDisplay = document.getElementById('gameNameDisplay');
+
+/* If no game id in query, show a friendly message */
+if(!gameId){
+  document.body.innerHTML = '<header style="background:var(--green);color:var(--cream);padding:1rem;text-align:center;font-family:var(--font-title)">Dugout — Live Game Viewer</header><div style="max-width:800px;margin:2rem auto;padding:1rem;background:#fff;border-radius:8px;border:2px solid var(--green);text-align:center"><h2>No game specified</h2><p class="muted">Open a share link like <code>?game=GAMEID</code> or create a live session from the Record a Game page.</p></div>';
+  throw new Error('no game id');
+}
+
+/* set share link */
+const shareUrl = `${location.origin}/live.html?game=${gameId}`;
+linkBox.value = shareUrl;
+openLiveBtn.onclick = ()=> window.open(shareUrl,'_blank');
+copyBtn.onclick = ()=> {
+  linkBox.select(); try{ document.execCommand('copy'); alert('Copied link to clipboard'); }catch(e){ alert('Copy failed; use Ctrl/Cmd+C'); }
+};
+
+/* helper: format recent play entries */
+function makePlayHtml(key, entry, rIndex, cIndex){
+  const time = entry && entry.ts ? (new Date(entry.ts)).toLocaleTimeString() : '';
+  const ev = entry && entry.event ? entry.event : '';
+  const runs = entry && entry.runs ? ` • R:${entry.runs}` : '';
+  const note = entry && entry.note ? ` • ${entry.note}` : '';
+  const who = (rIndex !== undefined) ? `B${rIndex+1} I${cIndex+1}` : key;
+  return `<div style="padding:.45rem;border-bottom:1px solid #f1f1f1"><strong>${who}</strong> — ${ev}${runs}${note}<div style="font-size:.8rem;color:#777;margin-top:.25rem">${time}</div></div>`;
+}
+
+/* subscribe to Firestore doc */
+const docRef = db.collection('games').doc(gameId);
+const unsubscribe = docRef.onSnapshot(doc=>{
+  if(!doc.exists){
+    document.body.innerHTML = '<header style="background:var(--green);color:var(--cream);padding:1rem;text-align:center;font-family:var(--font-title)">Dugout — Live Game Viewer</header><div style="max-width:900px;margin:2rem auto;padding:1rem;background:#fff;border-radius:8px;border:2px solid var(--green);text-align:center"><h2>Game not found</h2><p class="muted">This game either does not exist or has been removed.</p></div>';
+    unsubscribe();
+    return;
+  }
+
+  const data = doc.data();
+
+  // if ended flag present show end message
+  if(data.ended){
+    document.body.innerHTML = '<header style="background:var(--green);color:var(--cream);padding:1rem;text-align:center;font-family:var(--font-title)">Dugout — Live Game Viewer</header><div style="max-width:900px;margin:2rem auto;padding:1rem;background:#fff;border-radius:8px;border:2px solid var(--green);text-align:center"><h2>Game Ended</h2><p class="muted">This game has been marked ended by the scorer. You can still view final stats if available.</p></div>';
+    unsubscribe();
+    return;
+  }
+
+  // populate top-level metadata
+  const meta = data.meta || {};
+  gameNameDisplay.textContent = meta.name || '';
+  awayNameEl.textContent = meta.awayName || (meta.opponent ? meta.opponent : 'Away');
+  homeNameEl.textContent = meta.homeName || 'Home';
+
+  // scoreboard (if stored)
+  const scoreboard = data.scoreboard || {};
+  awayScoreEl.textContent = scoreboard.away != null ? scoreboard.away : 0;
+  homeScoreEl.textContent = scoreboard.home != null ? scoreboard.home : 0;
+
+  // count and inning
+  const count = data.count || {};
+  ballsDisplay.textContent = count.balls != null ? count.balls : 0;
+  strikesDisplay.textContent = count.strikes != null ? count.strikes : 0;
+  outsDisplay.textContent = count.outs != null ? count.outs : 0;
+
+  const current = data.current || { inning:1, batterIndex:0 };
+  inningDisplay.textContent = current.inning || 1;
+
+  // lineup
+  const lineup = data.lineup || [];
+  lineup.forEach((p, i)=>{
+    // ensure at least empty placeholders
+    if(!p) lineup[i] = { num:'', player:`Batter ${i+1}`, pos:'' };
+  });
+
+  // render lineup
+  lineupList.innerHTML = '';
+  lineup.forEach((p, i)=>{
+    const li = document.createElement('li');
+    li.className = (i === (current.batterIndex||0)) ? 'current' : '';
+    li.innerHTML = `<div><span style="margin-right:.6rem">${i+1}.</span>${p.player || ''}</div><div class="muted">${p.num ? '#'+p.num : ''} ${p.pos || ''}</div>`;
+    lineupList.appendChild(li);
+  });
+
+  // current batter box
+  const cb = lineup[current.batterIndex] || {player:`Batter ${current.batterIndex+1}`, num:'', pos:''};
+  currentBatterBox.innerHTML = `<div style="font-size:1.05rem;font-weight:700">${cb.player}</div><div class="muted">#${cb.num || ''} • ${cb.pos || ''}</div>`;
+
+  // build per-inning runs by summing grid column runs (away team)
+  const grid = data.grid || {};
+  // initialize array of innings
+  const innings = [];
+  for(let i=0;i<12;i++) innings[i]=0; // support up to 12
+  Object.keys(grid).forEach(k=>{
+    const match = k.match(/^r(\d+)_c(\d+)$/);
+    if(!match) return;
+    const r = parseInt(match[1],10), c = parseInt(match[2],10);
+    const entry = grid[k];
+    if(entry && entry.runs){
+      innings[c] = (innings[c]||0) + (entry.runs||0);
+    }
+  });
+
+  // render inning cells up to 9 (or dynamic)
+  inningsRow.innerHTML = '';
+  const showInnings = Math.max(9, (data.current && data.current.inning) || 9);
+  for(let i=0;i<showInnings;i++){
+    const cell = document.createElement('div');
+    cell.className = 'inning-cell';
+    cell.innerText = innings[i] != null ? (innings[i]===0 ? '' : innings[i]) : '';
+    inningsRow.appendChild(cell);
+  }
+
+  // recent plays: show last 10 entries from grid sorted by timestamp
+  const plays = [];
+  Object.entries(grid).forEach(([k, entry])=>{
+    if(!entry) return;
+    // parse key to row/col
+    const m = k.match(/^r(\d+)_c(\d+)$/);
+    const r = m ? parseInt(m[1],10) : undefined;
+    const c = m ? parseInt(m[2],10) : undefined;
+    plays.push({ key:k, entry, r, c, ts: entry.ts ? new Date(entry.ts).getTime() : 0 });
+  });
+  plays.sort((a,b)=> (b.ts||0)-(a.ts||0));
+  recentPlays.innerHTML = plays.slice(0,12).map(p=> makePlayHtml(p.key,p.entry,p.r,p.c)).join('');
+
+}); // end onSnapshot
+
+/* helper functions reused here (simple) */
+function makePlayHtml(key, entry, rIndex, cIndex){
+  const time = entry && entry.ts ? (new Date(entry.ts)).toLocaleTimeString() : '';
+  const ev = entry && entry.event ? entry.event : '—';
+  const runs = entry && entry.runs ? ` • R:${entry.runs}` : '';
+  const note = entry && entry.note ? ` • ${entry.note}` : '';
+  const who = (rIndex !== undefined) ? `B${rIndex+1} I${cIndex+1}` : key;
+  return `<div style="padding:.5rem;border-bottom:1px solid #f4f4f4"><strong>${who}</strong> — ${ev}${runs}${note}<div style="font-size:.78rem;color:#777;margin-top:.25rem">${time}</div></div>`;
+}
+
+/* manual refresh button */
+refreshBtn.onclick = ()=> {
+  // re-fetch once
+  db.collection('games').doc(gameId).get().then(doc=>{
+    if(!doc.exists) return alert('Game not found');
+    const data = doc.data();
+    // trigger the onSnapshot handler manually by setting link box (it already updates automatically)
+    console.log('refreshed',data);
+    alert('Refreshed');
+  }).catch(e=>{ console.error(e); alert('Refresh failed'); });
+};
+
+</script>
+</body>
+</html>
