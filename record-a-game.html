@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dugout — Record a Game</title>
+
+  <!-- Basic page styling (matches your app theme) -->
+  <style>
+    :root{
+      --cream:#f9f5e7; --green:#1e4022; --gold:#d8b26e; --red:#a63232;
+      --font-title:'League Spartan', sans-serif; --font-body:'IBM Plex Sans', sans-serif;
+    }
+    html,body{height:100%;margin:0;font-family:var(--font-body);background:var(--cream);color:var(--green);}
+    header{background:var(--green);color:var(--cream);padding:1rem;text-align:center;font-family:var(--font-title);font-size:1.6rem;}
+    .wrap{max-width:1100px;margin:1.2rem auto;padding:1rem;}
+    .card{background:#fff;border:2px solid var(--green);border-radius:10px;padding:1rem;box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+    .toprow{display:flex;gap:1rem;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap}
+    .meta input{padding:.5rem;border:2px solid var(--gold);border-radius:8px;font-size:1rem;color:var(--green)}
+    .grid-preview{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:10px 0}
+    .cell{
+      background:#fafafa;border:1px solid var(--gold);padding:6px;font-size:11px;min-height:48px;display:flex;flex-direction:column;justify-content:center;
+    }
+    .cell small{color:#666}
+    .controls{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+    button{background:var(--green);color:var(--cream);border:none;padding:.6rem .9rem;border-radius:8px;cursor:pointer;font-weight:600}
+    .btn-outline{background:transparent;border:2px solid var(--green);color:var(--green)}
+    .start-row{display:flex;gap:1rem;align-items:center}
+    .big{font-size:1.05rem;padding:.8rem 1rem}
+    .record-panel{display:grid;grid-template-columns:1fr 320px;gap:1rem;margin-top:1rem}
+    .square-view{background:#fff;border:2px solid var(--gold);border-radius:8px;padding:1rem}
+    .square-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+    .events{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+    .events button{padding:.5rem .7rem;font-size:.95rem}
+    .footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+    .link-input{padding:.5rem;border:1px solid #ddd;border-radius:6px;width:100%}
+    .small-muted{font-size:0.9rem;color:#666}
+    /* responsive */
+    @media(max-width:900px){
+      .record-panel{grid-template-columns:1fr}
+      .grid-preview{grid-template-columns:repeat(5,1fr)}
+    }
+  </style>
+
+  <!-- Firebase (compat for easier use) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>Record a Game — Dugout</header>
+
+  <div class="wrap">
+    <div class="card">
+      <!-- Top meta and lineup load -->
+      <div class="toprow">
+        <div class="meta" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label><strong>Coach</strong><br><input id="coachInput" placeholder="Coach name"></label>
+          <label><strong>Opponent</strong><br><input id="oppInput" placeholder="Opponent"></label>
+          <label><strong>Game Name (optional)</strong><br><input id="gameName" placeholder="e.g. Championship vs Tigers"></label>
+        </div>
+
+        <div class="start-row">
+          <button id="loadLineupBtn" class="btn-outline">Load Lineup from Write a Lineup</button>
+          <button id="startGameBtn" class="big">Start Game</button>
+          <button id="shareLinkBtn" class="btn-outline" title="Create shareable link">Share Live</button>
+        </div>
+      </div>
+
+      <!-- Full playbook preview (before starting) -->
+      <div id="previewArea">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <div><strong>Full Playbook Preview</strong><div class="small-muted">You can review/edit squares before starting</div></div>
+          <div class="small-muted">9 innings × 9 batters</div>
+        </div>
+
+        <!-- visual grid: rows = batters (1..9), cols = innings (1..9) -->
+        <div id="gridPreview" class="grid-preview"></div>
+      </div>
+
+      <!-- Recording panel (single-square experience when started) -->
+      <div id="recordArea" style="display:none" class="record-panel">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+            <div><strong id="liveTitle">Inning 1 — Batter 1</strong><div class="small-muted" id="liveSub">#0 — Player name</div></div>
+            <div style="text-align:right">
+              <div class="small-muted">Outs: <span id="outs">0</span></div>
+              <div class="small-muted">Balls: <span id="balls">0</span> Strikes: <span id="strikes">0</span></div>
+            </div>
+          </div>
+
+          <div class="square-view">
+            <div class="square-meta">
+              <div><strong>Event</strong></div>
+              <div class="small-muted">Record the play then Save</div>
+            </div>
+
+            <div>
+              <label>Result</label><br>
+              <select id="eventType" style="padding:.5rem;border-radius:6px;width:100%;border:1px solid #ddd">
+                <option value="">-- select result --</option>
+                <option value="out">Out</option>
+                <option value="single">Single</option>
+                <option value="double">Double</option>
+                <option value="triple">Triple</option>
+                <option value="homerun">Home Run</option>
+                <option value="walk">Walk</option>
+                <option value="hbp">Hit By Pitch</option>
+                <option value="error">Error</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div style="margin-top:.6rem">
+              <label>Runs Scored</label><br>
+              <input id="runsScored" type="number" min="0" style="padding:.5rem;border-radius:6px;width:100%;border:1px solid #ddd">
+            </div>
+
+            <div style="margin-top:.6rem">
+              <label>Notes (optional)</label><br>
+              <input id="note" type="text" placeholder="Quick note (e.g., RBI to 2B)" style="padding:.5rem;border-radius:6px;width:100%;border:1px solid #ddd">
+            </div>
+
+            <div style="margin-top:.8rem">
+              <div class="events">
+                <button class="btn-outline" id="btnStrike">Strike</button>
+                <button class="btn-outline" id="btnBall">Ball</button>
+                <button class="btn-outline" id="btnOut">Mark Out</button>
+                <button class="btn-outline" id="btnNext">Next Batter</button>
+              </div>
+            </div>
+
+            <div style="margin-top:.8rem;display:flex;gap:.5rem;">
+              <button id="saveSquare" class="big">Save Play</button>
+              <button id="abortSquare" class="btn-outline">Cancel Play</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- right column: quick scoreboard + share link -->
+        <div class="card">
+          <div style="margin-bottom:1rem">
+            <strong>Live Scoreboard</strong>
+            <div class="small-muted" style="margin-top:.4rem">This updates as you save plays</div>
+          </div>
+
+          <div id="scoreboardState" style="margin-bottom:1rem">
+            <div>Home: <strong id="homeScore">0</strong></div>
+            <div>Away: <strong id="awayScore">0</strong></div>
+            <div style="margin-top:.6rem">Inning: <strong id="currentInning">1</strong></div>
+          </div>
+
+          <div style="margin-top:1rem">
+            <label>Shareable Link</label>
+            <input id="shareableLink" class="link-input" readonly placeholder="Create a share link to share live"/>
+            <div class="small-muted" style="margin-top:.5rem">Link valid while game exists (add cloud function to auto-delete after 24h)</div>
+          </div>
+
+          <div style="margin-top:1rem">
+            <button id="endGameBtn" class="btn-outline">End Game</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem">
+        <div class="small-muted">Saved progress is stored locally and synced to the cloud for live view. You can close the app and come back — your game will persist.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App script (initializes firebase and handles UI + Firestore) -->
+  <script>
+  /***********************
+   * Firebase init (your snippet)
+   ***********************/
+  const firebaseConfig = {
+    apiKey: "AIzaSyBri9ILoCR21RS1ow2epFocbka63sLOSEM",
+    authDomain: "dugout-live-96480.firebaseapp.com",
+    projectId: "dugout-live-96480",
+    storageBucket: "dugout-live-96480.firebasestorage.app",
+    messagingSenderId: "183818216509",
+    appId: "1:183818216509:web:579e3d68c856591346b654",
+    measurementId: "G-9XE7D18EYH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  /***********************
+   * App state helpers
+   ***********************/
+  // default sizes
+  const BATTERS = 9;
+  const INNINGS = 9;
+
+  // DOM refs
+  const gridPreview = document.getElementById('gridPreview');
+  const startGameBtn = document.getElementById('startGameBtn');
+  const previewArea = document.getElementById('previewArea');
+  const recordArea = document.getElementById('recordArea');
+  const liveTitle = document.getElementById('liveTitle');
+  const liveSub = document.getElementById('liveSub');
+  const eventType = document.getElementById('eventType');
+  const runsScored = document.getElementById('runsScored');
+  const noteInput = document.getElementById('note');
+  const saveSquareBtn = document.getElementById('saveSquare');
+  const abortSquareBtn = document.getElementById('abortSquare');
+  const shareLinkBtn = document.getElementById('shareLinkBtn');
+  const shareableLinkInput = document.getElementById('shareableLink');
+  const loadLineupBtn = document.getElementById('loadLineupBtn');
+  const coachInput = document.getElementById('coachInput');
+  const oppInput = document.getElementById('oppInput');
+  const gameNameInput = document.getElementById('gameName');
+  const currentInningEl = document.getElementById('currentInning');
+  const homeScoreEl = document.getElementById('homeScore');
+  const awayScoreEl = document.getElementById('awayScore');
+  const outsEl = document.getElementById('outs');
+  const ballsEl = document.getElementById('balls');
+  const strikesEl = document.getElementById('strikes');
+
+  // in-memory state
+  let lineup = []; // array of {num, player, pos}
+  let grid = {};   // map "r{row}_c{col}" => { event, runs, note, ts }
+  let current = { inning: 1, batterIndex: 0 };
+  let gameId = null;
+  let started = false;
+  let scoreboard = { home:0, away:0 };
+  let count = { balls:0, strikes:0, outs:0 };
+
+  /***********************
+   * Utilities
+   ***********************/
+  function saveLocal() {
+    localStorage.setItem('dugout_game', JSON.stringify({ gameId, lineup, grid, current, started, scoreboard, count, meta:{coach:coachInput.value, opponent:oppInput.value, name:gameNameInput.value} }));
+  }
+  function loadLocal() {
+    const raw = localStorage.getItem('dugout_game');
+    if(!raw) return false;
+    try {
+      const o = JSON.parse(raw);
+      gameId = o.gameId || null;
+      lineup = o.lineup || createBlankLineup();
+      grid = o.grid || {};
+      current = o.current || { inning:1, batterIndex:0 };
+      started = o.started || false;
+      scoreboard = o.scoreboard || {home:0,away:0};
+      count = o.count || {balls:0,strikes:0,outs:0};
+      coachInput.value = (o.meta && o.meta.coach) || '';
+      oppInput.value = (o.meta && o.meta.opponent) || '';
+      gameNameInput.value = (o.meta && o.meta.name) || '';
+      return true;
+    } catch(e){ console.warn('loadLocal parse failed',e); return false; }
+  }
+
+  function createBlankLineup(){
+    const arr=[];
+    for(let i=0;i<BATTERS;i++) arr.push({num:'',player:``,pos:''});
+    return arr;
+  }
+
+  function createBlankGrid(){
+    const g={};
+    for(let r=0;r<BATTERS;r++){
+      for(let c=0;c<INNINGS;c++){
+        g[`r${r}_c${c}`]=null;
+      }
+    }
+    return g;
+  }
+
+  function renderGridPreview(){
+    gridPreview.innerHTML='';
+    for(let r=0;r<BATTERS;r++){
+      // show batter label on left column (we'll show # and name)
+      for(let c=0;c<INNINGS;c++){
+        const key = `r${r}_c${c}`;
+        const node = document.createElement('div');
+        node.className='cell';
+        const entry = grid[key];
+        const name = (lineup[r] && lineup[r].player) ? lineup[r].player : `Batter ${r+1}`;
+        node.innerHTML = `<small>${r+1} — ${name}</small><div style="flex:1"></div>
+                          <div style="font-size:12px;color:#333">${entry ? entry.event || '' : ''}</div>
+                          <small style="color:#777">${entry && entry.runs ? 'R:'+entry.runs : ''}</small>`;
+        node.dataset.key = key;
+        node.addEventListener('click', ()=> openSquareFor(r,c));
+        gridPreview.appendChild(node);
+      }
+    }
+  }
+
+  /***********************
+   * Firestore helpers
+   ***********************/
+  async function createGameDoc() {
+    // create doc with initial data
+    const docRef = db.collection('games').doc();
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+    const initial = {
+      createdAt: now,
+      started: false,
+      lineup,
+      grid,
+      current,
+      scoreboard,
+      count,
+      meta: { coach: coachInput.value || '', opponent: oppInput.value || '', name: gameNameInput.value || '' }
+    };
+    await docRef.set(initial);
+    gameId = docRef.id;
+    saveLocal();
+    return docRef.id;
+  }
+
+  async function updateGameDoc(patch) {
+    if(!gameId) return;
+    const docRef = db.collection('games').doc(gameId);
+    await docRef.set(patch, { merge: true });
+  }
+
+  function subscribeToRemoteDoc(id) {
+    // Optional: If user has same game open elsewhere, real-time updates will be applied locally.
+    db.collection('games').doc(id).onSnapshot(snap=>{
+      if(!snap.exists) return;
+      const data = snap.data();
+      // Merge remote into local but avoid overwriting local editing state heavily.
+      if(data.lineup) lineup = data.lineup;
+      if(data.grid) grid = Object.assign({}, grid, data.grid);
+      if(data.current) current = data.current;
+      if(data.scoreboard) scoreboard = data.scoreboard;
+      if(data.count) count = data.count;
+      // update UI
+      renderGridPreview();
+      updateScoreUI();
+      saveLocal();
+    });
+  }
+
+  /***********************
+   * UI actions
+   ***********************/
+  // load lineup from write-lineup localStorage if present
+  loadLineupBtn.addEventListener('click', ()=>{
+    const w = localStorage.getItem('lineupData');
+    if(!w){ alert('No lineup saved from Write a Lineup page.'); return; }
+    try{
+      const parsed = JSON.parse(w);
+      if(parsed.main){
+        // accept either our earlier format (main array) or a lineup array of objects
+        lineup = parsed.main.map(p=>({num:p.num||'',player:p.player||'',pos:p.pos||''}));
+      } else if(Array.isArray(parsed)){
+        lineup = parsed.slice(0,BATTERS);
+      } else {
+        lineup = createBlankLineup();
+      }
+      if(!grid || Object.keys(grid).length===0) grid = createBlankGrid();
+      saveLocal();
+      renderGridPreview();
+      alert('Lineup loaded from Write a Lineup.');
+    } catch(e){ console.warn(e); alert('Failed to load lineup.'); }
+  });
+
+  // starting the game: create doc if needed, mark started, collapse preview to single-square view
+  startGameBtn.addEventListener('click', async ()=>{
+    // ensure lineup exists
+    if(!lineup || lineup.length===0) lineup = createBlankLineup();
+    if(!grid || Object.keys(grid).length===0) grid = createBlankGrid();
+
+    // create a doc if not exist
+    if(!gameId){
+      await createGameDoc();
+      subscribeToRemoteDoc(gameId);
+    } else {
+      subscribeToRemoteDoc(gameId);
+    }
+
+    started = true;
+    current = { inning:1, batterIndex:0 };
+    // update remote
+    await updateGameDoc({ started:true, current, lineup, grid, meta:{ coach:coachInput.value, opponent:oppInput.value, name:gameNameInput.value }});
+    // switch UI
+    previewArea.style.display='none';
+    recordArea.style.display='grid';
+    updateSquareUI();
+    saveLocal();
+  });
+
+  // open single square for manual edit from preview
+  function openSquareFor(row, col){
+    // if game started, navigate to that square directly
+    current.inning = col+1;
+    current.batterIndex = row;
+    updateSquareUI();
+    // show record UI
+    previewArea.style.display='none';
+    recordArea.style.display='grid';
+  }
+
+  // update the single-square UI with the current batter/inning
+  function updateSquareUI(){
+    const r = current.batterIndex;
+    const c = current.inning - 1;
+    const playerName = (lineup[r] && lineup[r].player) ? lineup[r].player : `Batter ${r+1}`;
+    liveTitle.textContent = `Inning ${current.inning} — Batter ${r+1}`;
+    liveSub.textContent = `#${lineup[r] ? lineup[r].num : ''} — ${playerName}`;
+    currentInningEl.textContent = current.inning;
+    // load any previously saved square
+    const key = `r${r}_c${c}`;
+    const saved = grid[key];
+    eventType.value = saved && saved.event ? saved.event : '';
+    runsScored.value = saved && saved.runs ? saved.runs : '';
+    noteInput.value = saved && saved.note ? saved.note : '';
+    ballsEl.textContent = count.balls;
+    strikesEl.textContent = count.strikes;
+    outsEl.textContent = count.outs;
+    updateScoreUI();
+  }
+
+  // increment batter/inning after Save or Next
+  function advanceToNext(){
+    // next batter
+    current.batterIndex++;
+    if(current.batterIndex >= BATTERS){
+      current.batterIndex = 0;
+      current.inning++;
+      if(current.inning > INNINGS){
+        // finished all innings - end game
+        alert('You reached the final inning (UI still allows continuing). End game when finished.');
+        current.inning = INNINGS;
+      }
+    }
+    updateSquareUI();
+    saveLocal();
+  }
+
+  // Save the current square (persist to local grid and Firestore)
+  saveSquareBtn.addEventListener('click', async ()=>{
+    const r = current.batterIndex; const c = current.inning - 1;
+    const key = `r${r}_c${c}`;
+    const entry = {
+      event: eventType.value || null,
+      runs: runsScored.value ? parseInt(runsScored.value,10) : 0,
+      note: noteInput.value || '',
+      ts: new Date().toISOString(),
+      by: 'scorer'
+    };
+    grid[key] = entry;
+
+    // update scoreboard heuristics — very simple for demo (you can expand)
+    if(entry.runs && entry.runs > 0){
+      // assign to away (scorer's team) by default — you can add home/away toggle later
+      scoreboard.away = (scoreboard.away || 0) + entry.runs;
+    }
+
+    // reset count when play saved
+    count = {balls:0,strikes:0,outs: count.outs || 0};
+
+    saveLocal();
+    if(gameId) await updateGameDoc({ grid, current, scoreboard, count });
+    renderGridPreview();
+    updateScoreUI();
+    // advance to next batter
+    advanceToNext();
+  });
+
+  // Next / Ball / Strike / Out quick buttons
+  document.getElementById('btnBall').addEventListener('click', ()=>{
+    count.balls = (count.balls||0) + 1;
+    if(count.balls >= 4){ eventType.value='walk'; count.balls=0; count.strikes=0; }
+    ballsEl.textContent = count.balls;
+    strikesEl.textContent = count.strikes;
+    saveLocal(); if(gameId) updateGameDoc({count});
+  });
+  document.getElementById('btnStrike').addEventListener('click', ()=>{
+    count.strikes = (count.strikes||0) + 1;
+    if(count.strikes >= 3){ eventType.value='out'; count.strikes=0; count.balls=0; count.outs = (count.outs||0) + 1; }
+    ballsEl.textContent = count.balls; strikesEl.textContent = count.strikes; outsEl.textContent = count.outs;
+    saveLocal(); if(gameId) updateGameDoc({count});
+  });
+  document.getElementById('btnOut').addEventListener('click', ()=>{
+    eventType.value='out'; count.outs = (count.outs||0)+1; outsEl.textContent=count.outs; saveLocal(); if(gameId) updateGameDoc({count});
+  });
+  document.getElementById('btnNext').addEventListener('click', ()=> advanceToNext());
+  abortSquareBtn.addEventListener('click', ()=>{
+    // cancel current edits, keep in preview
+    eventType.value=''; runsScored.value=''; noteInput.value='';
+    // return to preview view
+    previewArea.style.display='block';
+    recordArea.style.display='none';
+    saveLocal();
+  });
+
+  // Create shareable link (just a URL to live.html?game=ID)
+  shareLinkBtn.addEventListener('click', async ()=>{
+    if(!gameId){
+      // create a doc first
+      gameId = await createGameDoc();
+      subscribeToRemoteDoc(gameId);
+    }
+    // update meta before sharing
+    await updateGameDoc({ meta:{ coach:coachInput.value, opponent:oppInput.value, name:gameNameInput.value }});
+    const url = `${location.origin}/live.html?game=${gameId}`;
+    shareableLinkInput.value = url;
+    shareableLinkInput.select();
+    try { document.execCommand('copy'); } catch(e){}
+    alert('Shareable link created and copied to clipboard. Anyone with the link can view the live game while it exists.');
+    saveLocal();
+  });
+
+  // End game: mark finished in Firestore and stop UI
+  document.getElementById('endGameBtn').addEventListener('click', async ()=>{
+    if(!gameId) { alert('No game to end.'); return; }
+    await updateGameDoc({ ended:true, endedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    started = false;
+    alert('Game ended. Share link will stop updating for viewers. Consider exporting the final sheet.');
+  });
+
+  // Load previously saved local game if present
+  (function init(){
+    const ok = loadLocal();
+    if(!ok){
+      lineup = createBlankLineup();
+      grid = createBlankGrid();
+    } else {
+      if(started){
+        // if started, show record UI
+        previewArea.style.display='none';
+        recordArea.style.display='grid';
+        renderGridPreview();
+        updateSquareUI();
+      } else {
+        renderGridPreview();
+      }
+    }
+    renderGridPreview();
+    updateScoreUI();
+  })();
+
+  // helper UI update
+  function updateScoreUI(){
+    homeScoreEl.textContent = scoreboard.home || 0;
+    awayScoreEl.textContent = scoreboard.away || 0;
+    currentInningEl.textContent = current.inning || 1;
+    outsEl.textContent = count.outs || 0;
+    ballsEl.textContent = count.balls || 0;
+    strikesEl.textContent = count.strikes || 0;
+  }
+
+  // Also allow clicking a preview cell to jump into that inning/batter
+  gridPreview.addEventListener('click', (e)=>{
+    const el = e.target.closest('.cell');
+    if(!el) return;
+    const key = el.dataset.key; if(!key) return;
+    // key like r0_c0
+    const parts = key.split('_');
+    const r = parseInt(parts[0].slice(1),10);
+    const c = parseInt(parts[1].slice(1),10);
+    current.batterIndex = r; current.inning = c+1;
+    previewArea.style.display='none'; recordArea.style.display='grid';
+    updateSquareUI();
+  });
+
+  </script>
+</body>
+</html>
